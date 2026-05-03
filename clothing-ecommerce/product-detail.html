@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - UrbanThreads</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<nav class="sticky top-0 z-50 nav-glass">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 md:h-20">
+            <div class="flex-shrink-0">
+                <a href="index.html" class="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-600 bg-clip-text text-transparent">
+                    URBAN<span class="text-black">THREADS</span>
+                </a>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="products.html?category=mens" class="nav-link">Mens</a>
+                <a href="products.html?category=womens" class="nav-link">Womens</a>
+                <a href="products.html?category=kids" class="nav-link">Kids</a>
+                <a href="products.html?category=accessories" class="nav-link">Accessories</a>
+            </div>
+            <div class="flex items-center space-x-5">
+                <a href="wishlist.html" class="relative"><i class="far fa-heart text-xl"></i><span id="wishlistCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span></a>
+                <a href="cart.html" class="relative"><i class="fas fa-shopping-bag text-xl"></i><span id="cartCount" class="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span></a>
+                <button onclick="toggleAuthModal()"><i class="far fa-user-circle text-xl"></i></button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Back Link -->
+<div class="max-w-7xl mx-auto px-4 pt-8">
+    <a href="javascript:history.back()" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div id="productContainer" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        <div class="loading-spinner"></div>
+    </div>
+</div>
+
+<!-- Related Products -->
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <h2 class="text-2xl font-bold mb-6">You May Also Like</h2>
+    <div id="relatedProducts" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"></div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12 mt-16">
+    <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
+        <div><h3 class="font-bold text-xl mb-4">URBANTHREADS</h3><p class="text-gray-400">Premium clothing for the modern lifestyle.</p></div>
+        <div><h4 class="font-semibold mb-4">Quick Links</h4><ul class="space-y-2 text-gray-400"><li><a href="#" class="hover:text-white">About Us</a></li><li><a href="#" class="hover:text-white">Contact</a></li></ul></div>
+        <div><h4 class="font-semibold mb-4">Policies</h4><ul class="space-y-2 text-gray-400"><li><a href="#" class="hover:text-white">Privacy Policy</a></li><li><a href="#" class="hover:text-white">Returns</a></li></ul></div>
+        <div><h4 class="font-semibold mb-4">Follow Us</h4><div class="flex space-x-4"><i class="fab fa-instagram text-2xl hover:text-gray-400 cursor-pointer"></i><i class="fab fa-facebook text-2xl hover:text-gray-400 cursor-pointer"></i></div></div>
+    </div>
+</footer>
+
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50"></div>
+
+<script>
+let currentProduct = null;
+let selectedSize = 'M';
+let quantity = 1;
+
+function formatPrice(price) {
+    return '₹' + price.toLocaleString('en-IN');
+}
+
+function generateStarRating(rating) {
+    let stars = '';
+    for (let i = 0; i < 5; i++) {
+        stars += i < Math.floor(rating) ? '<i class="fas fa-star text-yellow-400"></i>' : '<i class="far fa-star text-yellow-400"></i>';
+    }
+    return stars;
+}
+
+async function loadProducts() {
+    try {
+        const response = await fetch('data/products.json');
+        const data = await response.json();
+        const products = data.products || data;
+        localStorage.setItem('products', JSON.stringify(products));
+        return products;
+    } catch (error) {
+        console.error('Error loading products:', error);
+        return [];
+    }
+}
+
+async function loadProductDetail() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = parseInt(urlParams.get('id'));
+    const products = await loadProducts();
+    currentProduct = products.find(p => p.id === productId);
+    
+    if (!currentProduct) {
+        document.getElementById('productContainer').innerHTML = '<div class="text-center py-12"><p class="text-red-500">Product not found</p><a href="products.html" class="btn-primary mt-4 inline-block">Back to Shop</a></div>';
+        return;
+    }
+    
+    document.getElementById('productContainer').innerHTML = `
+        <div class="grid md:grid-cols-2 gap-8">
+            <div>
+                <img src="${currentProduct.image}" id="mainImage" class="w-full rounded-2xl shadow-md">
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold mb-2">${currentProduct.name}</h1>
+                <div class="flex items-center mb-4">
+                    ${generateStarRating(currentProduct.rating)}
+                    <span class="ml-2 text-gray-600">(${currentProduct.rating} reviews)</span>
+                </div>
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-3xl font-bold">${formatPrice(currentProduct.price)}</span>
+                    <span class="text-gray-400 line-through text-xl">${formatPrice(currentProduct.originalPrice)}</span>
+                    <span class="text-green-600 font-semibold">${currentProduct.discount}% OFF</span>
+                </div>
+                <p class="text-gray-600 mb-6">${currentProduct.description || 'Premium quality product with excellent finish. Made from high-grade materials for durability and comfort.'}</p>
+                
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-3">Select Size</h3>
+                    <div class="flex gap-3 flex-wrap">
+                        ${currentProduct.sizes.map(size => `
+                            <button onclick="selectSize('${size}')" class="size-btn ${selectedSize === size ? 'selected' : ''}">${size}</button>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-3">Quantity</h3>
+                    <div class="flex items-center gap-4">
+                        <button onclick="updateQuantity(-1)" class="quantity-btn">-</button>
+                        <span id="quantityDisplay" class="text-xl font-semibold w-12 text-center">${quantity}</span>
+                        <button onclick="updateQuantity(1)" class="quantity-btn">+</button>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button onclick="addToCart()" class="flex-1 bg-black text-white py-3 rounded-full font-semibold hover:bg-gray-800 transition">
+                        <i class="fas fa-shopping-bag mr-2"></i>Add to Cart
+                    </button>
+                    <button onclick="toggleWishlist()" class="px-6 py-3 border rounded-full hover:bg-gray-100 transition">
+                        <i class="far fa-heart text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    loadRelatedProducts(currentProduct.category, currentProduct.id);
+}
+
+function selectSize(size) {
+    selectedSize = size;
+    loadProductDetail();
+}
+
+function updateQuantity(delta) {
+    quantity = Math.max(1, quantity + delta);
+    document.getElementById('quantityDisplay').innerHTML = quantity;
+}
+
+function addToCart() {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = cart.find(item => item.id == currentProduct.id && item.size === selectedSize);
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        cart.push({ ...currentProduct, quantity, size: selectedSize });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    showToast('Added to cart!', 'success');
+    updateCounts();
+}
+
+function toggleWishlist() {
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const index = wishlist.indexOf(currentProduct.id);
+    if (index > -1) {
+        wishlist.splice(index, 1);
+        showToast('Removed from wishlist', 'info');
+    } else {
+        wishlist.push(currentProduct.id);
+        showToast('Added to wishlist!', 'success');
+    }
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    updateCounts();
+}
+
+async function loadRelatedProducts(category, excludeId) {
+    const products = await loadProducts();
+    const related = products.filter(p => p.category === category && p.id !== excludeId).slice(0, 4);
+    const container = document.getElementById('relatedProducts');
+    
+    if (related.length === 0) {
+        container.innerHTML = '<p class="text-gray-500">No related products found</p>';
+        return;
+    }
+    
+    container.innerHTML = related.map(p => `
+        <div class="product-card p-4" onclick="location.href='product-detail.html?id=${p.id}'">
+            <img src="${p.image}" class="w-full h-48 object-cover rounded-xl mb-3">
+            <h3 class="font-semibold">${p.name}</h3>
+            <div class="font-bold mt-1">${formatPrice(p.price)}</div>
+        </div>
+    `).join('');
+}
+
+function showToast(message, type) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `${type === 'success' ? 'bg-green-500' : 'bg-blue-500'} text-white px-6 py-3 rounded-lg shadow-lg mb-3`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function updateCounts() {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    document.getElementById('cartCount').textContent = cart.length;
+    document.getElementById('wishlistCount').textContent = wishlist.length;
+}
+
+// Auth functions
+function toggleAuthModal() {
+    const modal = document.getElementById('authModal');
+    if (modal) {
+        modal.classList.toggle('hidden');
+        modal.classList.toggle('flex');
+    }
+}
+
+loadProductDetail();
+updateCounts();
+</script>
+
+<!-- Auth Modal -->
+<div id="authModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold mb-4">Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" class="w-full border rounded-lg p-3 mb-3">
+        <input type="password" id="loginPassword" placeholder="Password" class="w-full border rounded-lg p-3 mb-4">
+        <button onclick="handleAuth()" class="w-full bg-black text-white py-3 rounded-lg font-semibold">Login</button>
+        <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-500">✕</button>
+    </div>
+</div>
+
+<script>
+function handleAuth() {
+    const email = document.getElementById('loginEmail').value;
+    if (email) {
+        localStorage.setItem('isLoggedIn', 'true');
+        showToast('Logged in!', 'success');
+        closeAuthModal();
+    }
+}
+function closeAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+}
+</script>
+</body>
+</html>

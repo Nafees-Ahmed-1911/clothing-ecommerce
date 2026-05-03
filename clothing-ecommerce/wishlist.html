@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - UrbanThreads</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<nav class="sticky top-0 z-50 nav-glass" id="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 md:h-20">
+            <div class="flex-shrink-0">
+                <a href="index.html" class="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-600 bg-clip-text text-transparent">
+                    URBAN<span class="text-black">THREADS</span>
+                </a>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="products.html?category=mens" class="nav-link">Mens</a>
+                <a href="products.html?category=womens" class="nav-link">Womens</a>
+                <a href="products.html?category=kids" class="nav-link">Kids</a>
+                <a href="products.html?category=accessories" class="nav-link">Accessories</a>
+            </div>
+            <div class="hidden md:flex flex-1 max-w-md mx-8">
+                <div class="relative w-full">
+                    <input type="text" id="searchInput" placeholder="Search products..." class="w-full px-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:border-gray-400 pl-10">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="flex items-center space-x-5">
+                <a href="wishlist.html" class="relative group">
+                    <i class="fas fa-heart text-xl text-red-500"></i>
+                    <span id="wishlistCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                </a>
+                <a href="cart.html" class="relative group">
+                    <i class="fas fa-shopping-bag text-xl group-hover:text-gray-600 transition"></i>
+                    <span id="cartCount" class="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                </a>
+                <button onclick="toggleAuthModal()" class="flex items-center space-x-2">
+                    <i class="far fa-user-circle text-xl"></i>
+                    <span id="userName" class="hidden md:inline text-sm">Account</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Back Link -->
+<div class="max-w-7xl mx-auto px-4 pt-8">
+    <a href="javascript:history.back()" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold mb-8 flex items-center gap-3">
+        <i class="fas fa-heart text-red-500"></i>
+        My Wishlist
+    </h1>
+    
+    <div id="wishlistContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <div id="emptyWishlist" class="text-center py-16 hidden">
+        <i class="far fa-heart text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 text-lg mb-4">Your wishlist is empty</p>
+        <p class="text-gray-400 mb-6">Save your favorite items here</p>
+        <a href="products.html" class="inline-block bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 transition">
+            <i class="fas fa-store mr-2"></i>Start Shopping
+        </a>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12 mt-16">
+    <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
+        <div><h3 class="font-bold text-xl mb-4">URBANTHREADS</h3><p class="text-gray-400">Premium clothing for the modern lifestyle.</p></div>
+        <div><h4 class="font-semibold mb-4">Quick Links</h4><ul class="space-y-2 text-gray-400"><li><a href="#" class="hover:text-white">About Us</a></li><li><a href="#" class="hover:text-white">Contact</a></li></ul></div>
+        <div><h4 class="font-semibold mb-4">Policies</h4><ul class="space-y-2 text-gray-400"><li><a href="#" class="hover:text-white">Privacy Policy</a></li><li><a href="#" class="hover:text-white">Returns</a></li></ul></div>
+        <div><h4 class="font-semibold mb-4">Follow Us</h4><div class="flex space-x-4"><i class="fab fa-instagram text-2xl hover:text-gray-400 cursor-pointer"></i><i class="fab fa-facebook text-2xl hover:text-gray-400 cursor-pointer"></i></div></div>
+    </div>
+</footer>
+
+<div id="authModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"><div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4"><h3 id="modalTitle" class="text-2xl font-bold mb-4">Login</h3><input type="email" id="loginEmail" placeholder="Email" class="w-full border rounded-lg p-3 mb-3"><input type="password" id="loginPassword" placeholder="Password" class="w-full border rounded-lg p-3 mb-4"><button onclick="handleAuth()" class="w-full bg-black text-white py-3 rounded-lg font-semibold">Login</button><p class="text-center mt-4"><a href="#" onclick="switchAuthMode()" class="text-blue-600">Create an account</a></p><button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-500">✕</button></div></div>
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50"></div>
+
+<script>
+function formatPrice(price) {
+    return '₹' + price.toLocaleString('en-IN');
+}
+
+function generateStarRating(rating) {
+    let stars = '';
+    for (let i = 0; i < 5; i++) {
+        stars += i < Math.floor(rating) ? '<i class="fas fa-star text-yellow-400"></i>' : '<i class="far fa-star text-yellow-400"></i>';
+    }
+    return stars;
+}
+
+async function loadProducts() {
+    try {
+        const response = await fetch('data/products.json');
+        const data = await response.json();
+        const products = data.products || data;
+        localStorage.setItem('products', JSON.stringify(products));
+        return products;
+    } catch (error) {
+        console.error('Error loading products:', error);
+        return [];
+    }
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    toast.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg mb-3`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function updateCounts() {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    document.getElementById('cartCount').textContent = cart.length;
+    document.getElementById('wishlistCount').textContent = wishlist.length;
+}
+
+function addToCart(productId) {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const product = products.find(p => p.id == productId);
+    if (product) {
+        cart.push({ ...product, quantity: 1, size: 'M' });
+        localStorage.setItem('cart', JSON.stringify(cart));
+        showToast('Added to cart!', 'success');
+        updateCounts();
+    }
+}
+
+function toggleWishlist(productId) {
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const index = wishlist.indexOf(productId);
+    if (index > -1) {
+        wishlist.splice(index, 1);
+        showToast('Removed from wishlist', 'info');
+    }
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    updateCounts();
+    renderWishlist();
+}
+
+async function renderWishlist() {
+    const wishlistIds = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const products = await loadProducts();
+    const wishlistProducts = products.filter(p => wishlistIds.includes(p.id));
+    const container = document.getElementById('wishlistContainer');
+    const emptyDiv = document.getElementById('emptyWishlist');
+    
+    if (wishlistProducts.length === 0) {
+        container.innerHTML = '';
+        emptyDiv.classList.remove('hidden');
+        return;
+    }
+    
+    emptyDiv.classList.add('hidden');
+    container.innerHTML = wishlistProducts.map(p => `
+        <div class="product-card p-4">
+            <img src="${p.image}" class="w-full h-64 object-cover rounded-xl mb-4">
+            <h3 class="font-semibold text-lg">${p.name}</h3>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="text-xl font-bold">${formatPrice(p.price)}</span>
+                <span class="text-gray-400 line-through text-sm">${formatPrice(p.originalPrice)}</span>
+            </div>
+            <div class="flex mt-2">${generateStarRating(p.rating)}</div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="addToCart(${p.id})" class="flex-1 bg-black text-white py-2 rounded-full hover:bg-gray-800 transition">Add to Cart</button>
+                <button onclick="toggleWishlist(${p.id})" class="px-4 py-2 border rounded-full text-red-500 hover:bg-red-50 transition">Remove</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Auth functions
+function toggleAuthModal() {
+    const modal = document.getElementById('authModal');
+    modal.classList.toggle('hidden');
+    modal.classList.toggle('flex');
+}
+
+let isLoginMode = true;
+
+function switchAuthMode() {
+    isLoginMode = !isLoginMode;
+    document.getElementById('modalTitle').textContent = isLoginMode ? 'Login' : 'Sign Up';
+}
+
+function handleAuth() {
+    const email = document.getElementById('loginEmail').value;
+    if (email) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
+        document.getElementById('userName').textContent = email.split('@')[0];
+        showToast('Logged in successfully!', 'success');
+        closeAuthModal();
+    }
+}
+
+function closeAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+    document.getElementById('authModal').classList.remove('flex');
+}
+
+if (localStorage.getItem('isLoggedIn') === 'true') {
+    const email = localStorage.getItem('userEmail');
+    if (email) document.getElementById('userName').textContent = email.split('@')[0];
+}
+
+renderWishlist();
+updateCounts();
+</script>
+</body>
+</html>
